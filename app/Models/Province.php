@@ -9,7 +9,7 @@ class Province extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code'];
+    protected $fillable = ['name', 'code', 'region'];
 
     public function municipalities()
     {

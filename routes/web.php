@@ -24,6 +24,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     
     // API for cascading dropdowns
     Route::get('/api/provinces/{province}/municipalities', [IpcrfController::class, 'getMunicipalities']);
+    Route::get('/api/municipalities/{municipality}/schools', [IpcrfController::class, 'getSchools']);
     
     // Notices
     Route::get('/notices', [NoticeController::class, 'index'])->name('notices');

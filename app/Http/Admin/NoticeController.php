@@ -27,12 +27,21 @@ class NoticeController extends Controller {
             'posted_at' => now(),
         ]);
         
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Notice posted successfully');
     }
     
     public function destroy($id) {
         $notice = Notice::findOrFail($id);
         $notice->update(['is_active' => false]);
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Notice removed');
     }
 }

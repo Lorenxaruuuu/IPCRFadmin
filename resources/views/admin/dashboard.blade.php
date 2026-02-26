@@ -176,8 +176,9 @@
                         <div class="glass-panel rounded-2xl p-6 card-hover border-l-4 border-blue-500">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="text-gray-500 text-sm mb-1">Total IPCRF Uploaded</p>
-                                    <h3 class="text-3xl font-bold text-gray-800">1,248</h3>
+                                    <p class="text-gray-500 text-sm mb-1">IPCRF Uploaded</p>
+                                    <h3 class="text-3xl font-bold text-gray-800">{{ $stats['uploaded_employees'] }}</h3>
+                                    <p class="text-xs text-gray-500">({{ $stats['total_uploaded'] }} file{{ $stats['total_uploaded'] == 1 ? '' : 's' }} uploaded)</p>
                                 </div>
                                 <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-file-alt text-blue-600 text-xl"></i>
@@ -189,7 +190,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-gray-500 text-sm mb-1">Active Forms</p>
-                                    <h3 class="text-3xl font-bold text-gray-800">1</h3>
+                                    <h3 class="text-3xl font-bold text-gray-800">{{ $stats['active_forms'] }}</h3>
                                 </div>
                                 <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-check-circle text-green-600 text-xl"></i>
@@ -201,10 +202,21 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-gray-500 text-sm mb-1">Notices</p>
-                                    <h3 class="text-3xl font-bold text-gray-800">12</h3>
+                                    <h3 class="text-3xl font-bold text-gray-800">{{ $stats['notices'] }}</h3>
                                 </div>
                                 <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                                     <i class="fas fa-bell text-orange-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-panel rounded-2xl p-6 card-hover border-l-4 border-teal-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm mb-1">Total Employees</p>
+                                    <h3 class="text-3xl font-bold text-gray-800">{{ $stats['total_employees'] }}</h3>
+                                </div>
+                                <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-users text-teal-600 text-xl"></i>
                                 </div>
                             </div>
                         </div>
@@ -230,30 +242,14 @@
                                         </tr>
                                     </thead>
                                     <tbody class="text-sm">
-                                        <tr class="border-b border-gray-100">
-                                            <td class="py-3 font-medium">Juan Dela Cruz</td>
-                                            <td class="py-3 text-gray-600">Davao City</td>
-                                            <td class="py-3 text-gray-600">February 19, 2026</td>
-                                            <td class="py-3"><span class="status-badge bg-green-100 text-green-700">Verified</span></td>
-                                        </tr>
-                                        <tr class="border-b border-gray-100">
-                                            <td class="py-3 font-medium">Maria Santos</td>
-                                            <td class="py-3 text-gray-600">Cebu City</td>
-                                            <td class="py-3 text-gray-600">February 18, 2026</td>
-                                            <td class="py-3"><span class="status-badge bg-yellow-100 text-yellow-700">Pending</span></td>
-                                        </tr>
-                                        <tr class="border-b border-gray-100">
-                                            <td class="py-3 font-medium">Pedro Reyes</td>
-                                            <td class="py-3 text-gray-600">Manila</td>
-                                            <td class="py-3 text-gray-600">February 17, 2026</td>
-                                            <td class="py-3"><span class="status-badge bg-green-100 text-green-700">Verified</span></td>
-                                        </tr>
-                                        <tr class="border-b border-gray-100">
-                                            <td class="py-3 font-medium">Ana Lim</td>
-                                            <td class="py-3 text-gray-600">Davao City</td>
-                                            <td class="py-3 text-gray-600">February 16, 2026</td>
-                                            <td class="py-3"><span class="status-badge bg-blue-100 text-blue-700">Saved</span></td>
-                                        </tr>
+                                        @foreach($recentSubmissions as $record)
+                                            <tr class="border-b border-gray-100">
+                                                <td class="py-3 font-medium">{{ $record->employee?->fullName() ?? 'N/A' }}</td>
+                                                <td class="py-3 text-gray-600">{{ optional(optional(optional($record->employee)->school)->municipality)->province->name ?? '' }}</td>
+                                                <td class="py-3 text-gray-600">{{ $record->uploaded_at ? $record->uploaded_at->format('F j, Y') : 'N/A' }}</td>
+                                                <td class="py-3"><span class="status-badge bg-green-100 text-green-700">{{ $record->status }}</span></td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -265,23 +261,16 @@
                             <p class="text-xs text-gray-500 mb-4">Broadcasted to all users</p>
                             
                             <div class="space-y-4">
-                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h4 class="font-semibold text-sm">Deadline Extension</h4>
-                                        <span class="status-badge priority-high">High</span>
+                                @foreach($announcements as $notice)
+                                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <h4 class="font-semibold text-sm">{{ $notice->subject }}</h4>
+                                            <span class="status-badge priority-{{ strtolower($notice->priority) }}">{{ $notice->priority }}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-600 mb-2">{{ $notice->content }}</p>
+                                        <p class="text-xs text-gray-400">Posted on {{ $notice->posted_at->format('M j, Y') }}</p>
                                     </div>
-                                    <p class="text-xs text-gray-600 mb-2">The deadline for 1st Semester IPCRF has been extended to March 15.</p>
-                                    <p class="text-xs text-gray-400">Posted on Feb 19, 2026</p>
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h4 class="font-semibold text-sm">System Maintenance</h4>
-                                        <span class="status-badge priority-medium">Medium</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 mb-2">Scheduled maintenance on Feb 25, 2026 at 2:00 AM.</p>
-                                    <p class="text-xs text-gray-400">Posted on Feb 18, 2026</p>
-                                </div>
+                                @endforeach
                             </div>
                             
                             <button onclick="showView('notices')" class="w-full mt-4 text-blue-600 text-sm font-medium hover:underline">
@@ -350,6 +339,21 @@
 
                         <!-- Step 2: Upload Form -->
                         <div id="upload-step-2" class="glass-panel rounded-2xl p-8 hidden">
+                            @if($errors->any())
+                                <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+                                    {{ implode(' ', $errors->all()) }}
+                                </div>
+                            @endif
+                            @if(session('success'))
+                                <div class="mb-4 p-3 bg-green-100 text-green-700 rounded">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+                            @if(session('warning'))
+                                <div class="mb-4 p-3 bg-yellow-100 text-yellow-700 rounded">
+                                    {{ session('warning') }}
+                                </div>
+                            @endif
                             <div class="flex items-center gap-2 mb-6">
                                 <button onclick="prevStep()" class="text-gray-500 hover:text-gray-700">
                                     <i class="fas fa-arrow-left"></i>
@@ -357,66 +361,77 @@
                                 <h3 class="text-xl font-bold">Upload IPCRF Form - <span id="selected-role" class="text-blue-600"></span></h3>
                             </div>
                             
-                            <form id="uploadForm" class="space-y-6">
+                            <form id="uploadForm" class="space-y-6" action="{{ route('admin.upload.store') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" name="role" id="hidden-role" value="{{ old('role') }}">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Employee Name</label>
-                                        <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Search employee...">
+                                        <input type="text" name="employee_name" value="{{ old('employee_name') }}" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Search employee...">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
-                                        <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 2024-00123">
+                                        <input type="text" name="employee_id" value="{{ old('employee_id') }}" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 2024-00123">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Province</label>
-                                        <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                                            <option>Select Province</option>
-                                            <option>Davao del Sur</option>
-                                            <option>Cebu</option>
-                                            <option>Metro Manila</option>
+                                        <select id="province-select" name="province" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500" onchange="loadDashboardMunicipalities(this.value)">
+                                            <option value="">Select Province</option>
+                                            @foreach($provinces as $province)
+                                                <option value="{{ $province->id }}" {{ old('province') == $province->id ? 'selected' : '' }}>{{ $province->name }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Municipality</label>
-                                        <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                                            <option>Select Municipality</option>
-                                            <option>Davao City</option>
-                                            <option>Digos City</option>
+                                        <select id="municipality-select-dashboard" name="municipality" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                                            <option value="">Select Municipality</option>
+                                            @if(old('municipality') && old('province'))
+                                                @php
+                                                    $oldMuns = \App\Models\Municipality::where('province_id', old('province'))->get();
+                                                @endphp
+                                                @foreach($oldMuns as $mun)
+                                                    <option value="{{ $mun->id }}" {{ old('municipality') == $mun->id ? 'selected' : '' }}>{{ $mun->name }}</option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">School</label>
-                                        <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                                            <option>Select School</option>
-                                        </select>
+                                        <input type="text" id="school-select-dashboard" name="school" placeholder="Enter school name" value="{{ old('school') }}" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
-                                        <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                                            <option>1st Semester</option>
-                                            <option>2nd Semester</option>
+                                        <select name="semester" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                                            <option value="1st" {{ old('semester') == '1st' ? 'selected' : '' }}>1st Semester</option>
+                                            <option value="2nd" {{ old('semester') == '2nd' ? 'selected' : '' }}>2nd Semester</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">School Year</label>
-                                        <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                                            <option>2025-2026</option>
-                                            <option>2024-2025</option>
+                                        <select name="school_year" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                                            <option {{ old('school_year') == '2027-2028' ? 'selected' : '' }}>2027-2028</option>
+                                            <option {{ old('school_year') == '2026-2027' ? 'selected' : '' }}>2026-2027</option>
+                                            <option {{ old('school_year') == '2025-2026' ? 'selected' : '' }}>2025-2026</option>
+                                            <option {{ old('school_year') == '2024-2025' ? 'selected' : '' }}>2024-2025</option>
+                                            <option {{ old('school_year') == '2023-2024' ? 'selected' : '' }}>2023-2024</option>
+                                            <option {{ old('school_year') == '2022-2023' ? 'selected' : '' }}>2022-2023</option>
                                         </select>
                                     </div>
                                 </div>
 
-                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition cursor-pointer bg-gray-50">
+                                <div id="file-dropzone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition cursor-pointer bg-gray-50">
                                     <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
                                     <p class="text-gray-600 mb-1">Click to upload or drag and drop</p>
-                                    <p class="text-sm text-gray-400">PDF, Excel files up to 10MB</p>
-                                    <input type="file" class="hidden" accept=".pdf,.xlsx,.xls">
+                                    <p class="text-sm text-gray-400">PDF, Excel, Word files up to 10MB</p>
+                                    <input type="file" name="file" class="hidden" accept=".pdf,.xlsx,.xls,.doc,.docx" required>
+                                    <p id="file-name" class="text-sm text-gray-600 mt-2"></p>
                                 </div>
 
                                 <div class="flex gap-4">
@@ -479,36 +494,38 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Province</label>
-                                <select id="filter-province" onchange="filterRecords()" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                                <select id="filter-province" onchange="loadDashboardMunicipalities(this.value); filterRecords();" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
                                     <option value="">All Provinces</option>
-                                    <option value="davao">Davao del Sur</option>
-                                    <option value="cebu">Cebu</option>
-                                    <option value="manila">Metro Manila</option>
+                                    @foreach($provinces as $province)
+                                        <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Municipality</label>
                                 <select id="filter-municipality" onchange="filterRecords()" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
                                     <option value="">All Municipalities</option>
-                                    <option value="davao-city">Davao City</option>
-                                    <option value="digos">Digos City</option>
-                                    <option value="cebu-city">Cebu City</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Semester</label>
-                                <select class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
-                                    <option>All Semesters</option>
-                                    <option>1st Semester</option>
-                                    <option>2nd Semester</option>
+                                <select id="filter-semester" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                                    <option value="">All Semesters</option>
+                                    <option value="1st Semester">1st Semester</option>
+                                    <option value="2nd Semester">2nd Semester</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Year</label>
-                                <select class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                                <select id="filter-year" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                                    <option value="">All Years</option>
+                                    <option>2027</option>
                                     <option>2026</option>
                                     <option>2025</option>
                                     <option>2024</option>
+                                    <option>2023</option>
+                                    <option>2022</option>
+                                    <option>2021</option>
                                 </select>
                             </div>
                         </div>
@@ -526,54 +543,28 @@
                                     </tr>
                                 </thead>
                                 <tbody id="records-table-body" class="text-sm">
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                        <td class="py-4 font-medium">Juan Dela Cruz</td>
-                                        <td class="py-4 text-gray-600">Davao City</td>
-                                        <td class="py-4 text-gray-600">February 19, 2026</td>
-                                        <td class="py-4"><span class="status-badge bg-green-100 text-green-700">Saved to Drive</span></td>
-                                        <td class="py-4">
-                                            <button class="text-gray-400 hover:text-blue-600 transition">
-                                                <i class="fas fa-download text-lg"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                        <td class="py-4 font-medium">Maria Santos</td>
-                                        <td class="py-4 text-gray-600">Cebu City</td>
-                                        <td class="py-4 text-gray-600">February 18, 2026</td>
-                                        <td class="py-4"><span class="status-badge bg-green-100 text-green-700">Saved to Drive</span></td>
-                                        <td class="py-4">
-                                            <button class="text-gray-400 hover:text-blue-600 transition">
-                                                <i class="fas fa-download text-lg"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                        <td class="py-4 font-medium">Pedro Reyes</td>
-                                        <td class="py-4 text-gray-600">Manila</td>
-                                        <td class="py-4 text-gray-600">February 17, 2026</td>
-                                        <td class="py-4"><span class="status-badge bg-green-100 text-green-700">Saved to Drive</span></td>
-                                        <td class="py-4">
-                                            <button class="text-gray-400 hover:text-blue-600 transition">
-                                                <i class="fas fa-download text-lg"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    @foreach($recentSubmissions as $record)
+                                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                            <td class="py-4 font-medium">{{ $record->employee?->fullName() ?? 'N/A' }}</td>
+                                            <td class="py-4 text-gray-600">{{ optional(optional(optional($record->employee)->school)->municipality)->province->name ?? '' }}</td>
+                                            <td class="py-4 text-gray-600">{{ $record->uploaded_at ? $record->uploaded_at->format('F j, Y') : 'N/A' }}</td>
+                                            <td class="py-4"><span class="status-badge bg-green-100 text-green-700">{{ $record->status }}</span></td>
+                                            <td class="py-4">
+                                                @if($record->id)
+                                                    <a href="{{ route('admin.records.download', $record->id) }}" class="text-gray-400 hover:text-blue-600 transition">
+                                                        <i class="fas fa-download text-lg"></i>
+                                                    </a>
+                                                @else
+                                                    <span class="text-gray-400">–</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Pagination -->
-                        <div class="flex justify-between items-center mt-6 pt-4 border-t">
-                            <p class="text-sm text-gray-500">Showing 1-10 of 1,248 records</p>
-                            <div class="flex gap-2">
-                                <button class="px-3 py-1 border rounded hover:bg-gray-50 text-sm">Previous</button>
-                                <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
-                                <button class="px-3 py-1 border rounded hover:bg-gray-50 text-sm">2</button>
-                                <button class="px-3 py-1 border rounded hover:bg-gray-50 text-sm">3</button>
-                                <button class="px-3 py-1 border rounded hover:bg-gray-50 text-sm">Next</button>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -631,47 +622,28 @@
                             <h3 class="text-xl font-bold mb-6">Active Announcements</h3>
                             
                             <div id="announcements-list" class="space-y-4">
-                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 relative group">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                <i class="fas fa-info text-blue-600"></i>
+                                @foreach($announcements as $notice)
+                                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 relative group" data-id="{{ $notice->id }}">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-info text-blue-600"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-gray-800">{{ $notice->subject }}</h4>
+                                                    <p class="text-xs text-gray-500">Posted on {{ $notice->posted_at->format('d/m/Y') }}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h4 class="font-bold text-gray-800">Deadline Extension</h4>
-                                                <p class="text-xs text-gray-500">Posted on 25/02/2026</p>
+                                            <div class="flex items-center gap-2">
+                                                <span class="status-badge priority-{{ strtolower($notice->priority) }}">{{ $notice->priority }}</span>
+                                                <button onclick="deleteNotice({{ $notice->id }}, this)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="status-badge priority-high">High</span>
-                                            <button onclick="deleteNotice(this)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
+                                        <p class="text-sm text-gray-600 ml-13 pl-13">{{ $notice->content }}</p>
                                     </div>
-                                    <p class="text-sm text-gray-600 ml-13 pl-13">The deadline for the 1st Semester IPCRF has been extended to March 15.</p>
-                                </div>
-
-                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 relative group">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                                <i class="fas fa-tools text-purple-600"></i>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-bold text-gray-800">System Maintenance</h4>
-                                                <p class="text-xs text-gray-500">Posted on 24/02/2026</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="status-badge priority-medium">Medium</span>
-                                            <button onclick="deleteNotice(this)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-gray-600">Scheduled maintenance on February 25, 2026 at 2:00 AM. System may be unavailable.</p>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -815,10 +787,16 @@
             selectedRole = role;
             document.getElementById('selected-role').textContent = role;
             document.getElementById('confirm-role').textContent = role;
+            document.getElementById('hidden-role').value = role;
             nextStep();
         }
 
         function nextStep() {
+            if (currentStep === 2) {
+                // perform normal submission instead of AJAX
+                document.getElementById('uploadForm').submit();
+                return;
+            }
             if (currentStep < 3) {
                 document.getElementById(`upload-step-${currentStep}`).classList.add('hidden');
                 currentStep++;
@@ -865,64 +843,98 @@
             const subject = document.getElementById('notice-subject').value;
             const content = document.getElementById('notice-content').value;
             const priority = document.querySelector('input[name="priority"]:checked').value;
-            
-            const priorityClass = {
-                'high': 'priority-high',
-                'medium': 'priority-medium',
-                'low': 'priority-low'
-            };
-            
-            const priorityLabel = {
-                'high': 'High',
-                'medium': 'Medium',
-                'low': 'Low'
-            };
-            
-            const date = new Date().toLocaleDateString('en-GB');
-            
-            const noticeHTML = `
-                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 relative group fade-in">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-info text-blue-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800">${subject}</h4>
-                                <p class="text-xs text-gray-500">Posted on ${date}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="status-badge ${priorityClass[priority]}">${priorityLabel[priority]}</span>
-                            <button onclick="deleteNotice(this)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-600 ml-13 pl-13">${content}</p>
-                </div>
-            `;
-            
-            document.getElementById('announcements-list').insertAdjacentHTML('afterbegin', noticeHTML);
-            document.getElementById('noticeForm').reset();
-            
-            showAlert('Announcement posted successfully!', 'success');
+            const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch('/admin/notices', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ subject, content, priority })
+            })
+            .then(res => res.json())
+            .then(() => {
+                location.reload();
+            });
         }
 
-        function deleteNotice(btn) {
-            if (confirm('Are you sure you want to delete this announcement?')) {
-                btn.closest('.bg-gray-50').remove();
-            }
+        function deleteNotice(id, btn) {
+            if (!confirm('Are you sure you want to delete this announcement?')) return;
+            const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            fetch(`/admin/notices/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(() => location.reload());
         }
 
         function filterRecords() {
-            // Simulate filtering - in real app, this would filter the table data
+            // request fresh data from server
+            loadDashboardRecords();
+        }
+
+        function loadDashboardRecords() {
             const province = document.getElementById('filter-province').value;
             const municipality = document.getElementById('filter-municipality').value;
-            
-            if (province && !municipality) {
-                showAlert('Please select a municipality to generate report', 'warning');
-            }
+            const semester = document.getElementById('filter-semester').value;
+            const year = document.getElementById('filter-year').value;
+
+            let url = `/admin/records?province=${province}&municipality=${municipality}`;
+            if (semester) url += `&semester=${encodeURIComponent(semester)}`;
+            if (year) url += `&year=${encodeURIComponent(year)}`;
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('records-table-body');
+                    tbody.innerHTML = '';
+                    data.records.forEach(r => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-gray-100 hover:bg-gray-50';
+
+                        const employee = document.createElement('td');
+                        employee.className = 'py-4 font-medium';
+                        employee.textContent = (r.employee?.first_name || '') + ' ' + (r.employee?.last_name || '');
+
+                        const region = document.createElement('td');
+                        region.className = 'py-4 text-gray-600';
+                        region.textContent = r.employee?.school?.municipality?.province?.name || '';
+
+                        const date = document.createElement('td');
+                        date.className = 'py-4 text-gray-600';
+                        if (r.uploaded_at) {
+                            const dt = new Date(r.uploaded_at);
+                            date.textContent = dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                        } else {
+                            date.textContent = 'N/A';
+                        }
+
+                        const status = document.createElement('td');
+                        status.className = 'py-4';
+                        status.innerHTML = `<span class="status-badge bg-green-100 text-green-700">${r.status}</span>`;
+
+                        const action = document.createElement('td');
+                        action.className = 'py-4';
+                        if (r.id) {
+                            action.innerHTML = `<a href="/admin/records/${r.id}/download" class="text-gray-400 hover:text-blue-600 transition"><i class="fas fa-download text-lg"></i></a>`;
+                        } else {
+                            action.textContent = '-';
+                            action.classList.add('text-gray-400');
+                        }
+
+                        tr.appendChild(employee);
+                        tr.appendChild(region);
+                        tr.appendChild(date);
+                        tr.appendChild(status);
+                        tr.appendChild(action);
+
+                        tbody.appendChild(tr);
+                    });
+                });
         }
 
         function downloadReport() {
@@ -933,8 +945,9 @@
                 showAlert('Please select both Province and Municipality to download report', 'warning');
                 return;
             }
-            
-            showAlert('Report download started...', 'success');
+
+            // navigate to records page with same filters so user can interact/download
+            window.location.href = `/admin/records?province=${province}&municipality=${municipality}`;
         }
 
         function showAlert(message = 'Please complete the required fields before proceeding.', type = 'warning') {
@@ -979,5 +992,115 @@
         document.getElementById('alert-modal').addEventListener('click', function(e) {
             if (e.target === this) closeAlert();
         });
+
+        // Cascading dropdowns for dashboard
+        function loadDashboardMunicipalities(provinceId) {
+            // upload step select
+            const uploadSelect = document.getElementById('municipality-select-dashboard');
+            if (uploadSelect) {
+                uploadSelect.innerHTML = '<option value="">Select Municipality</option>';
+            }
+            // filter select
+            const filterSelect = document.getElementById('filter-municipality');
+            if (filterSelect) {
+                filterSelect.innerHTML = '<option value="">All Municipalities</option>';
+            }
+
+            if (!provinceId) return;
+
+            fetch(`/admin/api/provinces/${provinceId}/municipalities`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(mun => {
+                        const option = document.createElement('option');
+                        option.value = mun.id;
+                        option.textContent = mun.name;
+                        if (uploadSelect) uploadSelect.appendChild(option.cloneNode(true));
+                        if (filterSelect) filterSelect.appendChild(option.cloneNode(true));
+                    });
+                });
+        }
+
+        function loadDashboardSchools(municipalityId) {
+            const select = document.getElementById('school-select-dashboard');
+            select.innerHTML = '<option value="">Select School</option>';
+            
+            if (!municipalityId) return;
+            
+            fetch(`/admin/api/municipalities/${municipalityId}/schools`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(school => {
+                        const option = document.createElement('option');
+                        option.value = school.id;
+                        option.textContent = school.name;
+                        select.appendChild(option);
+                    });
+                });
+        }
+
+        // file dropzone interactions
+        const dropzone = document.getElementById('file-dropzone');
+        if (dropzone) {
+            const fileInput = dropzone.querySelector('input[type=file]');
+            const fileNameEl = document.getElementById('file-name');
+
+            const updateFilename = () => {
+                const f = fileInput.files[0];
+                fileNameEl.textContent = f ? f.name : '';
+            };
+
+            dropzone.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', updateFilename);
+
+            dropzone.addEventListener('dragover', e => {
+                e.preventDefault();
+                dropzone.classList.add('border-blue-500');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('border-blue-500');
+            });
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropzone.classList.remove('border-blue-500');
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    updateFilename();
+                }
+            });
+        }
+
+        // remove old school loader function - not needed anymore
+        function loadDashboardSchools(municipalityId) {
+            // noop
+        }
+
+        @if($errors->any() || session('warning'))
+            document.addEventListener('DOMContentLoaded', () => {
+                showStep(2);
+            });
+        @endif
+        @if(old('role'))
+            document.addEventListener('DOMContentLoaded', () => {
+                selectedRole = "{{ old('role') }}";
+                document.getElementById('selected-role').textContent = selectedRole;
+                document.getElementById('confirm-role').textContent = selectedRole;
+                document.getElementById('hidden-role').value = selectedRole;
+            });
+        @endif
+        @if(old('province'))
+            document.addEventListener('DOMContentLoaded', () => {
+                const prov = "{{ old('province') }}";
+                loadDashboardMunicipalities(prov);
+                // once municipalities loaded set old municipality
+                const checkInterval = setInterval(() => {
+                    const mun = document.getElementById('municipality-select-dashboard');
+                    if (mun && mun.options.length > 1) {
+                        mun.value = "{{ old('municipality') }}";
+                        clearInterval(checkInterval);
+                    }
+                }, 50);
+            });
+        @endif
     </script>
 @endsection
