@@ -1,8 +1,8 @@
 <?php
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Admin;
 
-use app\Http\Controllers\Controller;
-use app\Models\Form;
+use App\Http\Controllers\Controller;
+use App\Models\Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -35,7 +35,7 @@ class FormController extends Controller
             'category' => $validated['category'],
             'description' => $validated['description'],
             'file_path' => $path,
-            'uploaded_by' => auth()->id(),
+            'uploaded_by' => auth()->id() ?? 1,
             'published_at' => now(),
         ]);
 

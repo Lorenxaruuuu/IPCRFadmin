@@ -18,7 +18,8 @@ class IpcrfRecord extends Model
         'school_year',
         'status',
         'remarks',
-        'uploaded_at'
+        'uploaded_at',
+        'role'
     ];
 
     protected $casts = [

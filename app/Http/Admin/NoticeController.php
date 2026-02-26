@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notice;
@@ -23,7 +23,7 @@ class NoticeController extends Controller {
             'subject' => $validated['subject'],
             'content' => $validated['content'],
             'priority' => $validated['priority'],
-            'posted_by' => auth()->id(),
+            'posted_by' => auth()->id() ?? 1,
             'posted_at' => now(),
         ]);
         

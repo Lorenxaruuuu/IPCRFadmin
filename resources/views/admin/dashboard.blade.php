@@ -1,6 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+@extends('admin.layouts.admin')
+
+@section('title', 'Admin Dashboard')
+
+@section('content')
+@yield('content')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPCRF Admin Management System</title>
@@ -96,8 +99,7 @@
             color: white;
         }
     </style>
-</head>
-<body class="bg-gray-50">
+<div class="bg-gray-50">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside class="sidebar-gradient w-64 flex-shrink-0 text-white flex flex-col">
@@ -978,5 +980,4 @@
             if (e.target === this) closeAlert();
         });
     </script>
-</body>
-</html>
+@endsection

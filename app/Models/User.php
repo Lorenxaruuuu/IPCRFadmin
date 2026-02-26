@@ -23,6 +23,22 @@ class User extends Authenticatable
         'password',
     ];
 
+    // User.php
+    public function ipcrfRecords()
+    {
+        return $this->hasMany(IpcrfRecord::class, 'uploaded_by');
+    }
+
+    public function forms()
+    {
+        return $this->hasMany(Form::class, 'uploaded_by');
+    }
+
+    public function notices()
+    {
+        return $this->hasMany(Notice::class, 'posted_by');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

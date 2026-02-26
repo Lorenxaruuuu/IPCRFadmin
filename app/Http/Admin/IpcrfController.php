@@ -49,11 +49,12 @@ class IpcrfController extends Controller
         
         IpcrfRecord::create([
             'employee_id' => $validated['employee_id'],
-            'uploaded_by' => auth()->id(),
+            'uploaded_by' => auth()->id() ?? 1,
             'file_path' => $path,
             'file_name' => $file->getClientOriginalName(),
             'semester' => $validated['semester'],
             'school_year' => $validated['school_year'],
+            'role' => $validated['role'], 
             'status' => 'Saved',
             'uploaded_at' => now(),
         ]);
