@@ -20,10 +20,11 @@ class NoticeController extends Controller {
         ]);
         
         Notice::create([
-            'subject' => $validated['subject'],
-            'content' => $validated['content'],
-            'priority' => $validated['priority'],
-            'posted_by' => auth()->id() ?? 1,
+            'subject'   => $validated['subject'],
+            'content'   => $validated['content'],
+            'priority'  => $validated['priority'],
+            // if the user is not logged in we allow null; migration now permits it
+            'posted_by' => auth()->id(),
             'posted_at' => now(),
         ]);
         
@@ -34,7 +35,7 @@ class NoticeController extends Controller {
         return back()->with('success', 'Notice posted successfully');
     }
     
-    public function destroy($id) {
+    public function destroy(Request $request, $id) {
         $notice = Notice::findOrFail($id);
         $notice->update(['is_active' => false]);
         

@@ -24,7 +24,9 @@ class Notice extends Model
 
     public function poster()
     {
-        return $this->belongsTo(User::class, 'posted_by');
+        return $this->belongsTo(User::class, 'posted_by')->withDefault([
+            'name' => 'System'
+        ]);
     }
 
     public function scopeActive($query)

@@ -17,7 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        // ensure there's at least one user with a known ID in case notices are created while 
+        // authentication isn't configured yet (dashboard may be accessed as guest).
         User::factory()->create([
+            'id' => 1,
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);

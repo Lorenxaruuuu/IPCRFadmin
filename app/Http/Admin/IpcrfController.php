@@ -101,7 +101,7 @@ class IpcrfController extends Controller
                     'first_name' => $first,
                     'last_name' => $last,
                     'school_id' => $school->id,
-                    'role' => 'Teacher',
+                    'role' => $validated['role'],
                     'email' => $validated['employee_id'] . '@example.com',
                 ]);
             } else {

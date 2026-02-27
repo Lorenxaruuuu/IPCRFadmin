@@ -576,7 +576,8 @@
                             <h3 class="text-xl font-bold mb-1">Create New Notice</h3>
                             <p class="text-sm text-gray-500 mb-6">Post announcements for all users</p>
                             
-                            <form id="noticeForm" onsubmit="postNotice(event)" class="space-y-4">
+                            <form id="noticeForm" method="POST" action="{{ route('admin.notices.store') }}" onsubmit="postNotice(event)" class="space-y-4">
+                                @csrf
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Subject</label>
                                     <input type="text" id="notice-subject" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500" placeholder="e.g., Deadline Extension" required>
@@ -586,19 +587,19 @@
                                     <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase">Priority Level</label>
                                     <div class="flex gap-3">
                                         <label class="flex-1 cursor-pointer">
-                                            <input type="radio" name="priority" value="low" class="hidden peer">
+                                            <input type="radio" name="priority" value="Low" class="hidden peer">
                                             <div class="text-center py-2 border-2 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-gray-50 transition text-sm font-medium">
                                                 LOW
                                             </div>
                                         </label>
                                         <label class="flex-1 cursor-pointer">
-                                            <input type="radio" name="priority" value="medium" class="hidden peer">
+                                            <input type="radio" name="priority" value="Medium" class="hidden peer">
                                             <div class="text-center py-2 border-2 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-gray-50 transition text-sm font-medium">
                                                 MEDIUM
                                             </div>
                                         </label>
                                         <label class="flex-1 cursor-pointer">
-                                            <input type="radio" name="priority" value="high" class="hidden peer" checked>
+                                            <input type="radio" name="priority" value="High" class="hidden peer" checked>
                                             <div class="text-center py-2 border-2 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-gray-50 transition text-sm font-medium">
                                                 HIGH
                                             </div>
@@ -838,14 +839,18 @@
             document.getElementById('uploadForm').reset();
         }
 
+        const noticeBaseUrl = `{{ url('admin/notices') }}`;
+
         function postNotice(e) {
             e.preventDefault();
             const subject = document.getElementById('notice-subject').value;
             const content = document.getElementById('notice-content').value;
-            const priority = document.querySelector('input[name="priority"]:checked').value;
+            let priority = document.querySelector('input[name="priority"]:checked').value;
+            // make sure case matches server enum (Low/Medium/High)
+            priority = priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
             const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch('/admin/notices', {
+            fetch(noticeBaseUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -854,16 +859,25 @@
                 },
                 body: JSON.stringify({ subject, content, priority })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw err; });
+                }
+                return res.json();
+            })
             .then(() => {
                 location.reload();
+            })
+            .catch(err => {
+                console.error('Failed to post notice', err);
+                alert('Unable to post announcement: ' + (err.message || JSON.stringify(err)));
             });
         }
 
         function deleteNotice(id, btn) {
             if (!confirm('Are you sure you want to delete this announcement?')) return;
             const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch(`/admin/notices/${id}`, {
+            fetch(`${noticeBaseUrl}/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrf,
