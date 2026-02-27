@@ -320,6 +320,11 @@
             <h3 style="margin-bottom: 20px; color: #fff;">Filter Records</h3>
             <form method="GET" class="filter-grid">
                 <div class="form-group">
+                    <label class="form-label">Employee ID</label>
+                    <input type="text" name="employee_id" class="form-select" placeholder="Search by Employee ID" value="{{ request('employee_id') }}">
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Province</label>
                     <select name="province" class="form-select" onchange="loadMunicipalities(this.value)">
                         <option value="">All Provinces</option>
@@ -360,7 +365,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Employee ID</th>
+                                <th>Employee ID - Name</th>
                                 <th>Province</th>
                                 <th>Municipality</th>
                                 <th>School</th>
@@ -374,7 +379,7 @@
                         <tbody>
                             @foreach($records as $record)
                                 <tr>
-                                    <td>{{ $record->employee?->employee_id ?? $record->employee_id ?? 'N/A' }}</td>
+                                    <td>{{ ($record->employee?->employee_id ?? 'N/A') . ' - ' . ($record->employee?->first_name ?? '') . ' ' . ($record->employee?->last_name ?? '') }}</td>
                                     <td>{{ $record->employee->school->municipality->province->name ?? 'N/A' }}</td>
                                     <td>{{ $record->employee->school->municipality->name ?? 'N/A' }}</td>
                                     <td>{{ $record->employee->school->name ?? 'N/A' }}</td>

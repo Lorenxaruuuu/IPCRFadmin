@@ -180,6 +180,12 @@ class IpcrfController extends Controller
             $recordQuery->where('school_year', $request->year);
         }
 
+        if ($request->filled('employee_id')) {
+            $recordQuery->whereHas('employee', function($q) use ($request) {
+                $q->where('employee_id', 'like', '%' . $request->employee_id . '%');
+            });
+        }
+
         // get records first
         $recordsCollection = $recordQuery->latest('uploaded_at')->get();
 
@@ -198,6 +204,10 @@ class IpcrfController extends Controller
                 $empQuery->whereHas('school.municipality', function($q) use ($request) {
                     $q->where('id', $request->municipality);
                 });
+            }
+
+            if ($request->filled('employee_id')) {
+                $empQuery->where('employee_id', 'like', '%' . $request->employee_id . '%');
             }
 
             $extras = $empQuery->take($needed)->get();

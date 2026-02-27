@@ -491,7 +491,11 @@
                         </div>
 
                         <!-- Filters -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 hidden" id="records-filters">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Employee ID</label>
+                                <input type="text" id="filter-employee-id" onchange="filterRecords()" placeholder="Search by Employee ID" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                            </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Province</label>
                                 <select id="filter-province" onchange="loadDashboardMunicipalities(this.value); filterRecords();" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
@@ -744,7 +748,64 @@
         </main>
     </div>
 
-    <!-- Alert Modal -->
+    <!-- Report Filter Modal -->
+    <div id="report-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="glass-panel rounded-2xl p-6 max-w-2xl w-full mx-4 transform scale-95 opacity-0 transition-all duration-300" id="report-modal-content">
+            <div class="mb-6">
+                <h3 class="text-xl font-bold mb-2">Generate IPCRF Records Report</h3>
+                <p class="text-sm text-gray-600">Select filters to customize your report</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Province</label>
+                    <select id="report-province" onchange="loadReportMunicipalities(this.value);" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                        <option value="">All Provinces</option>
+                        @foreach($provinces as $province)
+                            <option value="{{ $province->id }}">{{ $province->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Municipality</label>
+                    <select id="report-municipality" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                        <option value="">All Municipalities</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Semester</label>
+                    <select id="report-semester" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                        <option value="">All Semesters</option>
+                        <option value="1st Semester">1st Semester</option>
+                        <option value="2nd Semester">2nd Semester</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Year</label>
+                    <select id="report-year" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm">
+                        <option value="">All Years</option>
+                        <option>2027</option>
+                        <option>2026</option>
+                        <option>2025</option>
+                        <option>2024</option>
+                        <option>2023</option>
+                        <option>2022</option>
+                        <option>2021</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeReportModal()" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition font-medium">
+                    Cancel
+                </button>
+                <button onclick="proceedDownloadReport()" class="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition font-medium flex items-center gap-2">
+                    <i class="fas fa-download"></i>
+                    Download Report
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="glass-panel rounded-2xl p-6 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300" id="alert-content">
             <div class="text-center">
@@ -892,12 +953,14 @@
         }
 
         function loadDashboardRecords() {
+            const employeeId = document.getElementById('filter-employee-id').value;
             const province = document.getElementById('filter-province').value;
             const municipality = document.getElementById('filter-municipality').value;
             const semester = document.getElementById('filter-semester').value;
             const year = document.getElementById('filter-year').value;
 
             let url = `/admin/records?province=${province}&municipality=${municipality}`;
+            if (employeeId) url += `&employee_id=${encodeURIComponent(employeeId)}`;
             if (semester) url += `&semester=${encodeURIComponent(semester)}`;
             if (year) url += `&year=${encodeURIComponent(year)}`;
 
@@ -952,16 +1015,59 @@
         }
 
         function downloadReport() {
-            const province = document.getElementById('filter-province').value;
-            const municipality = document.getElementById('filter-municipality').value;
-            
-            if (!province || !municipality) {
-                showAlert('Please select both Province and Municipality to download report', 'warning');
-                return;
-            }
+            // Open the report filter modal
+            const modal = document.getElementById('report-modal');
+            const content = document.getElementById('report-modal-content');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
 
-            // navigate to records page with same filters so user can interact/download
-            window.location.href = `/admin/records?province=${province}&municipality=${municipality}`;
+        function closeReportModal() {
+            const modal = document.getElementById('report-modal');
+            const content = document.getElementById('report-modal-content');
+            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function loadReportMunicipalities(provinceId) {
+            const municipalitySelect = document.getElementById('report-municipality');
+            municipalitySelect.innerHTML = '<option value="">All Municipalities</option>';
+
+            if (!provinceId) return;
+
+            const url = `/admin/api/provinces/${provinceId}/municipalities`;
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(municipality => {
+                        const option = document.createElement('option');
+                        option.value = municipality.id;
+                        option.textContent = municipality.name;
+                        municipalitySelect.appendChild(option);
+                    });
+                });
+        }
+
+        function proceedDownloadReport() {
+            const province = document.getElementById('report-province').value;
+            const municipality = document.getElementById('report-municipality').value;
+            const semester = document.getElementById('report-semester').value;
+            const year = document.getElementById('report-year').value;
+
+            let url = `/admin/records?province=${province}&municipality=${municipality}`;
+            if (semester) url += `&semester=${encodeURIComponent(semester)}`;
+            if (year) url += `&year=${encodeURIComponent(year)}`;
+
+            closeReportModal();
+            window.location.href = url;
         }
 
         function showAlert(message = 'Please complete the required fields before proceeding.', type = 'warning') {
